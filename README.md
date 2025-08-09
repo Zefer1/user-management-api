@@ -21,6 +21,22 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Sobre este projeto
+
+API de gestão de utilizadores construída com NestJS, MySQL, TypeORM e JWT para autenticação.
+
+Funcionalidades principais:
+- CRUD de utilizadores
+- Autenticação via JWT
+- Validação e hash de passwords
+
+Endpoints importantes:
+- POST /users
+- GET /users (protegido)
+- POST /auth/login
+
+(Instruções de instalação e execução permanecem as do README padrão)
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
