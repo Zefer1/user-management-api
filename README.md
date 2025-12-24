@@ -1,131 +1,115 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# User Management API (NestJS)
 
-# User Management API
+API REST para gestão de utilizadores, com autenticação JWT, persistência via TypeORM/SQLite e documentação OpenAPI (Swagger).
 
-A complete user management system built with NestJS featuring JWT authentication, secure password handling, and RESTful API design.
+## Endpoints principais
 
-## Features
+| Método | Endpoint | Descrição | Auth |
+|---|---|---|---|
+| POST | `/users` | Criar utilizador | Público |
+| POST | `/auth/login` | Login (JWT) | Público |
+| GET | `/users` | Listar utilizadores | JWT |
+| GET | `/users/:id` | Detalhe do utilizador | JWT |
+| PUT | `/users/:id` | Atualizar utilizador | JWT |
+| DELETE | `/users/:id` | Remover utilizador | JWT |
+| GET | `/health` | Health check | Público |
 
-- **User Management**: Full CRUD operations for user accounts
-- **JWT Authentication**: Secure token-based authentication
-- **Password Security**: BCrypt password hashing
-- **Input Validation**: Comprehensive request validation
-- **Type Safety**: Full TypeScript implementation
-- **SQLite Database**: Easy setup with file-based database
-- **Protected Routes**: Role-based route protection
+## Swagger (OpenAPI)
 
-## API Endpoints
+- UI: `http://localhost:3001/docs`
+- Depois de fazer login, clica em **Authorize** e cola `Bearer <token>`.
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/auth/login` | User login | No |
-| POST | `/users` | Create new user | No |
-| GET | `/users` | Get all users | Yes |
-| GET | `/users/:id` | Get user by ID | Yes |
-| PUT | `/users/:id` | Update user | Yes |
-| DELETE | `/users/:id` | Delete user | Yes |
-| GET | `/health` | API health check | No |
+## Como correr localmente
 
-## Technologies Used
-
-- **NestJS** - Framework
-- **TypeScript** - Language
-- **TypeORM** - Database ORM
-- **SQLite** - Database
-- **JWT** - Authentication
-- **Passport** - Auth middleware
-- **BCrypt** - Password hashing
-- **Class Validator** - Input validation
-
-## ⚡ Quick Start
-
-### Prerequisites
-- Node.js (v16 or higher)
-- npm
-
-### Installation
+Pré-requisitos: Node.js 18+ (recomendado 20) e npm.
 
 ```bash
-# Clone repository
-git clone https://github.com/Zefer1/user-management-api
-cd user-management-api
-
-# Install dependencies
 npm install
 
-# Start development server
+# configura as variáveis de ambiente
+copy [.env.example](http://_vscodecontentref_/4) .env
+
 npm run start:dev
 ```
 
+API: `http://localhost:3001`
 
-The API will be running at `http://localhost:3001`
-
-## Testing the API
+## Como correr com Docker
 
 ```bash
+docker compose up --build
+```
 
+Por defeito a base de dados SQLite fica persistida em `./data/database.sqlite`.
+
+## Exemplo rápido (curl)
+
+Criar utilizador (password mínima: 8 chars):
+
+```bash
 curl -X POST http://localhost:3001/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Wick",
     "username": "johnwick",
-    "email": "johnWick@example.com",
-    "password": "password123"
+    "email": "johnwick@example.com",
+    "password": "password1234"
   }'
 ```
-  Login to Get Token
+
+Login:
+
 ```bash
- curl -X POST http://localhost:3001/auth/login \
+curl -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "johnwick",
-    "password": "password123"
+    "password": "password1234"
   }'
 ```
-  ## Access Protected Routes
+
+Usar token:
+
 ```bash
 curl http://localhost:3001/users \
   -H "Authorization: Bearer <your-jwt-token>"
 ```
-  ## Project Structure
 
-  src/
-├── auth/                 # Authentication module
-│   ├── auth.controller.ts
-│   ├── auth.service.ts
-│   ├── jwt.strategy.ts
-│   └── auth.module.ts
-├── user/                 # User management module
-│   ├── user.entity.ts
-│   ├── user.service.ts
-│   ├── user.controller.ts
-│   ├── create-user.dto.ts
-│   └── user.module.ts
-├── app.module.ts         # Root module
-└── main.ts              # Application entry point
+## Estrutura (alto nível)
 
-### Development
+```
+src/
+  auth/   # login + jwt strategy
+  user/   # entidade, DTOs, service, controller
+  app.module.ts
+  main.ts
+```
 
-# Development with hot-reload
+## Scripts
+
+```bash
 npm run start:dev
-
-# Build for production
 npm run build
-
-# Run tests
-npm run test
-
-# Lint code
+npm test
+npm run test:e2e
 npm run lint
-
-# Format code
 npm run format
+```
 
-### Configuration
+## Configuração
 
-Create a .env file for environment variables:
+Variáveis principais (ver `.env.example`):
 
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=1h
+- `JWT_SECRET` (obrigatório em produção; mínimo 20 chars)
+- `JWT_EXPIRES_IN` (default: `1h`)
+- `DB_PATH` (default: `database.sqlite`)
+- `DB_SYNCHRONIZE` (default: `true`; em produção recomenda-se `false` + migrações)
+
+## Ideias de evolução (roadmap)
+
+- Refresh tokens + logout + rotação de tokens
+- RBAC (roles/permissions) e auditoria
+- Migrações TypeORM (substituir `synchronize` em produção)
+- Paginação + filtros + ordenação para `/users`
+- Observabilidade: logging estruturado, tracing, métricas
+- Rate limiting e hardening de headers

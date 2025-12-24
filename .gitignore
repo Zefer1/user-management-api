@@ -4,6 +4,10 @@
 /node_modules
 /build
 
+# Local database / volumes
+database.sqlite
+data/
+
 # Logs
 logs
 *.log

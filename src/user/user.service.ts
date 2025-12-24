@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -21,10 +25,25 @@ export class UserService {
     private readonly repo: Repository<User>,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto): Promise<SafeUser> {
     const hash = await bcrypt.hash(dto.password, 10);
     const user = this.repo.create({ ...dto, password: hash });
-    return this.repo.save(user);
+
+    try {
+      const saved = await this.repo.save(user);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...safe } = saved;
+      return safe as SafeUser;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (
+        message.toLowerCase().includes('unique') ||
+        message.toLowerCase().includes('constraint')
+      ) {
+        throw new ConflictException('Username ou email já existe');
+      }
+      throw err;
+    }
   }
 
   async findAll(): Promise<SafeUser[]> {
